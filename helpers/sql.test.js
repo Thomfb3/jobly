@@ -18,7 +18,7 @@ describe("sqlForPartialUpdate", function () {
                 firstName: "first_name",
                 lastName: "last_name",
                 isAdmin: "is_admin",
-            };
+            }
         );
         expect(setCols).toEqual(`"first_name"=$1, "last_name"=$2, "is_admin"=$3`);
         expect(values).toEqual(["Tom", "Thompson", false]);
