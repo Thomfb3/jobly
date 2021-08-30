@@ -11,6 +11,7 @@ const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const userJobApplicationSchema = require("../schemas/userJobApplication.json");
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ const router = express.Router();
  * This returns the newly created user and an authentication token for them:
  *  {user: { username, firstName, lastName, email, isAdmin }, token }
  *
- * Authorization required: login
+ * Authorization required: logged in as Admin
  **/
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
@@ -48,7 +49,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  *
  * Returns list of all users.
  *
- * Authorization required: login
+ * Authorization required: logged in as Admin
  **/
 
 router.get("/", ensureAdmin, async function (req, res, next) {
@@ -65,7 +66,7 @@ router.get("/", ensureAdmin, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: login
+ * Authorization required: logged in as Admin or correct user
  **/
 
 router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
@@ -85,7 +86,7 @@ router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, nex
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: login
+ * Authorization required: logged in as Admin or correct user
  **/
 
 router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
@@ -102,6 +103,37 @@ router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, n
     return next(err);
   }
 });
+
+
+
+/** POST /[username]/jobs/[id] { jobID } => { applied: jobId  }
+ *
+ * Data can include:
+ *   { username, jobId }
+ *
+ * Returns { applied: jobId }
+ *
+ * Authorization required: logged as correct user or admin
+ **/
+
+router.post("/:username/jobs/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
+  try {
+    const applicationData = { username : req.params.username, jobId : +req.params.id };
+
+    const validator = jsonschema.validate(applicationData, userJobApplicationSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const job = await User.addJobApplication(applicationData);
+
+    return res.json({ applied: job.jobId });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 
 
 /** DELETE /[username]  =>  { deleted: username }

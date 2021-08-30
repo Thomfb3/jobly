@@ -134,12 +134,20 @@ describe("findAll", function () {
 describe("get", function () {
   test("works", async function () {
     let user = await User.get("u1");
+
+    let jobId = await db.query(`
+    SELECT id
+    FROM jobs
+    WHERE title = 'j1'`);
+
+
     expect(user).toEqual({
       username: "u1",
       firstName: "U1F",
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [jobId.rows[0].id]
     });
   });
 

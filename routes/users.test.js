@@ -183,6 +183,13 @@ describe("GET /users", function () {
 describe("GET /users/:username", function () {
 
   test("works for non-admin users to view themselves", async function () {
+
+    let userJob = await db.query(`
+      SELECT id
+      FROM jobs
+      WHERE title = 'j1'
+  `);
+
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u1Token}`);
@@ -193,11 +200,18 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [userJob.rows[0].id]
       },
     });
   });
 
   test("works for admin users", async function () {
+    let userJob = await db.query(`
+    SELECT id
+    FROM jobs
+    WHERE title = 'j1'
+`);
+
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u4Token}`);
@@ -208,6 +222,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [userJob.rows[0].id]
       },
     });
   });
@@ -239,6 +254,7 @@ describe("GET /users/:username", function () {
 describe("PATCH /users/:username", () => {
 
   test("works for admin users", async function () {
+
     const resp = await request(app)
       .patch(`/users/u1`)
       .send({
@@ -251,7 +267,7 @@ describe("PATCH /users/:username", () => {
         firstName: "New",
         lastName: "U1L",
         email: "user1@user.com",
-        isAdmin: false,
+        isAdmin: false
       },
     });
   });
@@ -297,6 +313,8 @@ describe("PATCH /users/:username", () => {
 
 
   test("works for admin users: set new password", async function () {
+
+
     const resp = await request(app)
       .patch(`/users/u1`)
       .send({
@@ -310,7 +328,7 @@ describe("PATCH /users/:username", () => {
         firstName: "U1F",
         lastName: "U1L",
         email: "user1@user.com",
-        isAdmin: false,
+        isAdmin: false
       },
     });
 
@@ -331,7 +349,7 @@ describe("PATCH /users/:username", () => {
         firstName: "U1F",
         lastName: "U1L",
         email: "user1@user.com",
-        isAdmin: false,
+        isAdmin: false
       },
     });
 

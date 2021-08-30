@@ -92,6 +92,19 @@ async function commonBeforeAll() {
       equity: 0.1,
       companyHandle: "c3"
     });
+  
+  let job = await db.query(`
+      SELECT id
+      FROM jobs
+      WHERE title = 'j1'
+  `);
+
+  await User.addJobApplication(
+    {
+      username : "u1",
+      jobId : job.rows[0].id
+    }
+  );
 }
 
 async function commonBeforeEach() {
